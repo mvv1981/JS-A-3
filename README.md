@@ -50,10 +50,11 @@ validateForm({
 Пример:
 ```html
 <input
-   name="age"
-   data-validator="number"
-   data-validator-min="0"
-   data-validator-max="100"
+       name="name"
+       id="profile-name"
+       placeholder="Моё имя"
+       data-required
+       data-validator="letters"
 />
 ```
 ## Валидатор numbers
