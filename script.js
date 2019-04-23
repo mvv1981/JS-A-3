@@ -2,47 +2,86 @@
 
 // Код валидации формы
 function validateForm(parameter) {
-    let inputList = document.getElementsByTagName('input');
-    let saveButton = document.getElementsByTagName('button');
-    processInput(inputList, parameter).setOnBlur().setOnFocus();
-    processButton(saveButton).validateOnSubmit(inputList);
+    let form = (document.querySelector('form#' + parameter.formId + '.form'));
+    initForm(form, parameter).setFormProperties();
 }
-function processInput(elementList, parameter) {
+function initForm(form, parameter) {
     return {
-        input: elementList,
+        elementList: form,
         parameter: parameter,
-        setOnBlur: function() {
-            let input = this.input;
+        setFormProperties: function() {
+            let inputList = new Array();
             let parameter = this.parameter;
-            if(input !== []) {
-                for (let i = 0; i < input.length; i++) {
-                    input[i].onblur = function () {
-                        let validateType = this.dataset.validator;
-                        switch (validateType) {
-                            case ('number'):
-                                validate(input[i], parameter).validateNumber();
-                                break;
-                            case ('letters'):
-                                validate(input[i], parameter).validateLetter();
-                                break;
-                            case ('regexp'):
-                                validate(input[i], parameter).validateRegExp();
-                                break;
+            for (let i = 0; i < this.elementList.length; i++) {
+                if(this.elementList[i].tagName !== 'BUTTON') {
+                    inputList.push(this.elementList[i]);
+                }
+            };
+            form.onsubmit = function(event) {
+                let validateResult = new Array();
+                event.preventDefault();
+                if(inputList !== []) {
+                    if(validate(form, parameter).validateIsRequired() === false) {
+                        reverseValidateClass(this, parameter, false);
+                        return
+                    }
+                    else {
+                        for (let i = 0; i <= inputList.length; i++) {
+                            if(i === inputList.length) {
+                                reverseValidateClass(this, parameter, true);
+                                return
+                            }
+                            else {
+                                switch (inputList[i].dataset.validator) {
+                                    case ('number'):
+                                        if(validate(inputList[i], parameter).validateNumber() === false) {
+                                            reverseValidateClass(this, parameter, false);
+                                            return
+                                        }
+                                        else {
+                                            break
+                                        }
+                                    case ('letters'):
+                                        if(validate(inputList[i], parameter).validateLetter() === false) {
+                                            reverseValidateClass(this, parameter, false);
+                                            return
+                                        }
+                                        else {
+                                            break
+                                        }
+                                    case ('regexp'):
+                                        if(validate(inputList[i], parameter).validateRegExp() === false) {
+                                            reverseValidateClass(this, parameter, false);
+                                            return
+                                        }
+                                        else {
+                                            break
+                                        }
+                                }
+                            }
                         }
                     }
                 }
-            }
-            return this
-        },
-        setOnFocus: function() {
-            let input = this.input;
-            let parameter = this.parameter;
-            if(input !== []) {
-                for (let i = 0; i < input.length; i++) {
-                    input[i].onfocus = function() {
-                        if(Array.prototype.indexOf.call(input[i].classList, parameter.inputErrorClass) !== -1) {
-                            input[i].classList.remove(parameter.inputErrorClass);
-                        }
+                return
+            };
+            //Добавляем обработчики событий на инпутах
+            for (let i = 0; i < inputList.length; i++) {
+                inputList[i].onblur = function () {
+                    switch (this.dataset.validator) {
+                        case ('number'):
+                            validate(inputList[i], parameter).validateNumber();
+                            break;
+                        case ('letters'):
+                            validate(inputList[i], parameter).validateLetter();
+                            break;
+                        case ('regexp'):
+                            validate(inputList[i], parameter).validateRegExp();
+                            break;
+                    }
+                };
+                inputList[i].onfocus = function() {
+                    if(Array.prototype.indexOf.call(inputList[i].classList, parameter.inputErrorClass) !== -1) {
+                        inputList[i].classList.remove(parameter.inputErrorClass);
                     }
                 }
             }
@@ -50,44 +89,30 @@ function processInput(elementList, parameter) {
         }
     }
 }
-function processButton(button, elementList) {
+function validate(element, parameter) {
     return {
-        button: button,
-        list: elementList,
-        validateOnSubmit: function() {
-            button[0].addEventListener(
-                'click',
-                function() {
-                    alert('its good for you');
-                },
-                false);
-            return this
-        }
-    }
-}
-function validate(element, classParameter) {
-    return {
-        element: element,
-        classParameter: classParameter,
         validateNumber: function() {
             let minValue = element.dataset.validatorMin;
             let maxValue = element.dataset.validatorMax;
             if(element.value === '') {
-                return this
+                return true
             }
             else {
                 if(isNaN(element.value)) {
-                    element.classList.add(classParameter.inputErrorClass);
+                    element.classList.add(parameter.inputErrorClass);
+                    return false
                 }
                 else {
                     if ((minValue !== undefined)&&(element.value <= Number(minValue))) {
-                        element.classList.add(classParameter.inputErrorClass);
+                        element.classList.add(parameter.inputErrorClass);
+                        return false
                     }
                     if ((maxValue !== undefined)&&(element.value >= Number(maxValue))) {
-                        element.classList.add(classParameter.inputErrorClass);
+                        element.classList.add(parameter.inputErrorClass);
+                        return false
                     }
                     else {
-                        return this
+                        return true
                     }
                 }
             }
@@ -96,22 +121,42 @@ function validate(element, classParameter) {
         validateLetter: function() {
             let regexp = /^[А-Яа-яЁёA-Za-z]+$/i;
             if((regexp.test(element.value))||(element.value === '')) {
-                return this
+                return true
             }
             else {
-                element.classList.add(classParameter.inputErrorClass);
+                element.classList.add(parameter.inputErrorClass);
+                return false
             }
-            return this
         },
         validateRegExp: function() {
             let regexp = new RegExp(element.dataset.validatorPattern);
             if((regexp.test(element.value))||(element.value === '')) {
-                return this
+                return true
             }
             else {
-                element.classList.add(classParameter.inputErrorClass);
+                element.classList.add(parameter.inputErrorClass);
+                return false
             }
-            return this
+        },
+        validateIsRequired: function() {
+            for(let i = 0; i < element.length; i++) {
+                let isRequired = element[i].dataset.required !== undefined? true : false;
+                if((isRequired)&&(element[i].value === '')) {
+                    element[i].classList.add(parameter.inputErrorClass);
+                    return false
+                }
+                else return true
+            }
         }
+    }
+}
+function reverseValidateClass(element, parameter, isValid) {
+    if(isValid) {
+        element.classList.remove(parameter.formInvalidClass);
+        element.classList.add(parameter.formValidClass);
+    }
+    else {
+        element.classList.remove(parameter.formValidClass);
+        element.classList.add(parameter.formInvalidClass);
     }
 }
