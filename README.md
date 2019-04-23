@@ -95,11 +95,11 @@ if (event.target.tagName === 'INPUT') {
 }
 ```
 События focus и blur не всплывают (bubbling). Делегирование можно сделать через перехват события (capturing): в обработчике события третьим параметром передаём true. Подробнее можно ознакомиться в документации этих событий.
-Ссылки
-Событие submit
-Событие focus
-Событие blur
-Review criteria
+## Ссылки
+[Событие submit](https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/submit_event)
+[Событие focus](https://developer.mozilla.org/en-US/docs/Web/API/Element/focus_event)
+[Событие blur](https://developer.mozilla.org/ru/docs/Web/Events/blur)
+## Review criteria
 Необходимо будет проанализировать код задания и на наборе тестовых кейсов проверить, что:
 соблюдены все обязательные требования;
 форма корректно реагирует на события: при наведении на элемент input, при потере фокуса и отправке формы;
