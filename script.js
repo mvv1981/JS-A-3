@@ -1,12 +1,5 @@
 'use strict';
 
-// Код валидации формы
-// validateForm({
-//    formId: 'profile',
-//    formValidClass: 'form_valid',
-//    formInvalidClass: 'form_invalid',
-//    inputErrorClass: 'input_error'
-// });
 function validateForm(setting) {
     var form = document.getElementById(setting.formId);
     var element = form.querySelectorAll('input, button');
