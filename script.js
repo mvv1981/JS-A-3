@@ -1,5 +1,5 @@
 'use strict';
-
+//Барабаш Максим Сергеевич
 // Код валидации формы
 function validateForm(parameter) {
     let form = (document.querySelector('form#' + parameter.formId + '.form'));
